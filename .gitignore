@@ -1,0 +1,9 @@
+.DS_Store
+.vscode-test.mjs
+.vscodeignore
+CHANGELOG.md
+eslint.config.mjs
+node_modules/
+package-lock.json
+tsconfig.json
+vsc-extension-quickstart.md
