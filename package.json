@@ -16,6 +16,10 @@
       {
         "command": "devpace.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "devpace.start",
+        "title": "pacestart"
       }
     ]
   },
