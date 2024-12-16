@@ -9,20 +9,47 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": ["onStartupFinished"],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "devpace.helloWorld",
-        "title": "Hello World"
+    "commands": [{
+      "command": "my-first-extension.popUp",
+      "title": "popUp"
+    } , {
+      "command": "my-first-extension.pausePopUps",
+      "title": "pausePopUps"
+    } , {
+      "command": "my-first-extension.startPopUps",
+      "title": "startPopUps"
+    } , {
+      "command": "my-first-extension.updateSettings",
+      "title": "updateSettings"
+    }
+  ], 
+  "configuration": {
+    "title": "devPace",
+    "properties": {
+      "devPace.userName": {
+        "type": "string",
+        "default": "Tech Wizard",
+        "description": "Name of the extension user."
       },
-      {
-        "command": "devpace.start",
-        "title": "pacestart"
+      "devPace.breakDuration": {
+        "type": "number",
+        "default": 10,
+        "description": "Break duration in minutes."
+      },
+      "devPace.workTime": {
+        "type": "number",
+        "default": 60,
+        "description": "Number of minutes of work without any breaks."
+      },
+      "devPace.configured": {
+        "type": "boolean",
+        "default": false,
+        "description": "True once the user has chosen settings."
       }
-    ]
-  },
+  }}},
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
