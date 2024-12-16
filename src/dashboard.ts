@@ -49,14 +49,15 @@ export class Dashboard {
         </body></html>`;
         
         setTimeout(() => {
+            //nested code gets executed only after this.breakDuration * 60 * 1000 has expired
             dashboard.dispose();
             this.timeoutId = setTimeout(() => {
                 vscode.commands.executeCommand('my-first-extension.popUp')
-            }, 5000); //worktime
-        }, 5000); //breaktime
+            }, this.workTime * 60 * 1000);
+        }, this.breakDuration * 60 * 1000);
     }
 
-    //this does not cancel the first popup; only subsequent popups
+    //this does not cancel the first popup (I think); only subsequent popups
     pausePopUps = () => {
         if (this.timeoutId !== null) {
             clearTimeout(this.timeoutId);
@@ -66,7 +67,7 @@ export class Dashboard {
     startPopUps = () => {
         setTimeout(() => {
             vscode.commands.executeCommand('my-first-extension.popUp')
-        }, 30000);
+        }, this.workTime * 60 * 1000);
     }
 
     waitForMssg = (): Promise<Message> => {
