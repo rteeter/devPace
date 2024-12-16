@@ -82,8 +82,14 @@ export class Dashboard {
                 const formDisposable = this.settings.webview.onDidReceiveMessage(listener);
                 this.context.subscriptions.push(formDisposable);
             }
-            // Optional: Handle timeout (in case the message is not received in time)
         })
+    }
+
+    waitForUpdates = async () => {
+        await this.config.update('userName', this.userName, vscode.ConfigurationTarget.Global);
+        await this.config.update('workTime', this.workTime, vscode.ConfigurationTarget.Global);
+        await this.config.update('breakDuration', this.breakDuration, vscode.ConfigurationTarget.Global);
+        await this.config.update('configured', true, vscode.ConfigurationTarget.Global);
     }
 
     updateSettings = () => {
@@ -102,15 +108,12 @@ export class Dashboard {
                 this.userName = message.text[0];
                 this.workTime = Number(message.text[1]);
                 this.breakDuration = Number(message.text[2]);
-                this.config.update('userName', this.userName);
-                this.config.update('workTime', this.workTime);
-                this.config.update('breakTime', this.breakDuration);
-                this.config.update('configured', true);
+                this.waitForUpdates();
                 vscode.window.showInformationMessage(`Pace preferences updated successfully. Have a good day, ${this.userName}!`);
                 if (this.settings){
                     this.settings.dispose();
                 }
-            })
+                })
             .catch((error) => {
                 vscode.window.showErrorMessage(error.message);
             })
