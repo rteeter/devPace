@@ -41,11 +41,29 @@ export class Dashboard {
         dashboard.webview.html = `<html><body>
             <h1>It's time to move around, ${this.userName}!</h1>
             <p>Your break is set for ${this.breakDuration} minutes.</p>
+            <span id="timerText">Placeholder</span>
             <p>How is your body feeling? Let me know which parts may feel tense.</p>
             <input type="text" id="userInput" placeholder="Type here!" />
             <br></br>
             <img src="${imageUri}" alt="Natural landscape">
-    
+            <script>
+                window.onload = function(){
+                    const timerText = document.getElementById('timerText');
+                    let countdownValue = ${this.breakDuration} * 60;
+                    const interval = setInterval(() => {
+                        if (countdownValue >= 0) {
+                            let minutes = Math.floor(countdownValue / 60);
+                            let seconds = countdownValue % 60;
+                            minutes = minutes < 10 ? '0' + minutes : minutes;
+                            seconds = seconds < 10 ? '0' + seconds : seconds;
+                            timerText.textContent = minutes + ":" + seconds;
+                            countdownValue--;
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 1000);
+                }
+            </script>
         </body></html>`;
         
         setTimeout(() => {
