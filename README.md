@@ -40,11 +40,17 @@ npm run compile
 
 ## Configuration Requirements
 
-1. Get an Anthropic API key from [https://console.anthropic.com/](https://console.anthropic.com/)
-2. Add your API key to VS Code settings:
-   - Open Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
-   - Type "Preferences: Open Settings (JSON)"
-   - Add:
+1. Get your Anthropic API Key:
+   - Visit [Anthropic Console](https://console.anthropic.com/)
+   - Sign up or log in
+   - Go to 'API Keys' section
+   - Click 'Create Key'
+   - Copy your new API key
+2. Add the API key to VS Code:
+   - Open VS Code
+   - Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
+   - Type "Preferences: Open User Settings (JSON)"
+   - Add this to your settings.json:
    ```json
    {
        "devPace.anthropicApiKey": "your-api-key-here"
