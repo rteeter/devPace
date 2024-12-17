@@ -31,6 +31,23 @@ export class Dashboard {
         this.encouragementStyle = String(this.config.get('encouragementStyle', 'Supportive Friend')) as EncouragementStyle;
         this.apiKey = String(this.config.get('anthropicApiKey', ''));
         this.settings = null;
+        this.checkApiKey();
+    }
+
+    private checkApiKey(): void {
+        if (!this.apiKey) {
+            vscode.window.showWarningMessage(
+                'Anthropic API key not set. Would you like to set it now?',
+                'Open Settings',
+                'Learn More'
+            ).then(selection => {
+                if (selection === 'Open Settings') {
+                    vscode.commands.executeCommand('workbench.action.openSettings', 'devPace.anthropicApiKey');
+                } else if (selection === 'Learn More') {
+                    vscode.env.openExternal(vscode.Uri.parse('https://console.anthropic.com/'));
+                }
+            });
+        }
     }
 
     private async generateEncouragement(): Promise<string> {
@@ -41,6 +58,7 @@ export class Dashboard {
 
             if (!this.apiKey) {
                 console.log('No API key found');
+                this.checkApiKey();
                 throw new Error('Anthropic API key not configured');
             }
 
@@ -141,6 +159,9 @@ export class Dashboard {
     }
 
     startPopUps = () => {
+        if (!this.apiKey) {
+            this.checkApiKey();
+        }
         setTimeout(() => {
             vscode.commands.executeCommand('my-first-extension.popUp')
         }, this.workTime * 60 * 1000);
@@ -167,9 +188,11 @@ export class Dashboard {
         await this.config.update('breakDuration', this.breakDuration, vscode.ConfigurationTarget.Global);
         await this.config.update('encouragementStyle', this.encouragementStyle, vscode.ConfigurationTarget.Global);
         await this.config.update('configured', true, vscode.ConfigurationTarget.Global);
+        this.checkApiKey();
     }
 
     updateSettings = () => {
+        this.checkApiKey();
         this.settings = vscode.window.createWebviewPanel(
             'paceSettings',
             'devPace Settings',
