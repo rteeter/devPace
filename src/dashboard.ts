@@ -130,10 +130,29 @@ export class Dashboard {
                 <body style="color: white; background-color: #1e1e1e;">
                     <h1 style="font-size: 24px; margin-bottom: 20px;">${encouragementMessage}</h1>
                     <p>Your break is set for ${this.breakDuration} minutes.</p>
+                    <span id="timerText"></span>
                     <p>How is your body feeling? Let me know which parts may feel tense.</p>
                     <input type="text" id="userInput" placeholder="Type here!" style="margin: 10px 0; padding: 5px;"/>
                     <br></br>
                     <img src="${imageUri}" alt="Natural landscape" style="max-width: 100%; height: auto;">
+                    <script>
+                    window.onload = function(){
+                        const timerText = document.getElementById('timerText');
+                        let countdownValue = ${this.breakDuration} * 60;
+                        const interval = setInterval(() => {
+                            if (countdownValue >= 0) {
+                                let minutes = Math.floor(countdownValue / 60);
+                                let seconds = countdownValue % 60;
+                                minutes = minutes < 10 ? '0' + minutes : minutes;
+                                seconds = seconds < 10 ? '0' + seconds : seconds;
+                                timerText.textContent = minutes + ":" + seconds;
+                                countdownValue--;
+                            } else {
+                                clearInterval(interval);
+                            }
+                        }, 1000);
+                    }
+                    </script>
                 </body>
             </html>`;
 
