@@ -19,8 +19,8 @@ DevPace is a VS Code extension that helps developers maintain a healthy work pac
 
 1. Clone the repository:
 ```bash
-git clone [repository-url]
-cd devpace
+git clone git@github.com:rteeter/devPace.git
+cd devPace
 ```
 
 2. Install dependencies:
@@ -77,7 +77,6 @@ This extension contributes the following settings:
 ## Known Issues
 
 - Break timer continues even if VS Code is inactive
-- [Add any known issues here]
 
 ## Release Notes
 
@@ -96,10 +95,6 @@ This extension contributes the following settings:
 npm run compile
 ```
 3. Press F5 to run the extension in debug mode
-4. To package the extension:
-```bash
-npm run package
-```
 
 ## Contributing
 
