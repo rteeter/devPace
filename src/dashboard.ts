@@ -10,6 +10,9 @@ interface Message {
 type EncouragementStyle = 'Cheerleader' | 'Supportive Friend' | 'Zen Master' |
     'Motivational Coach' | 'Inspiring Leader' | 'Friendly Colleague';
 
+type BodyPart = 'Neck' | 'Upper back' | 'Lower back' |
+    'Wrists' | "Mix";    
+
 export class Dashboard {
     private context: vscode.ExtensionContext;
     private timeoutId: NodeJS.Timeout | undefined;
@@ -20,6 +23,7 @@ export class Dashboard {
     private settings: vscode.WebviewPanel | null = null;
     private encouragementStyle: EncouragementStyle;
     private apiKey: string;
+    private dashboard: vscode.WebviewPanel | null = null;
 
     constructor(extensionContext: vscode.ExtensionContext) {
         this.context = extensionContext;
@@ -32,6 +36,7 @@ export class Dashboard {
         this.apiKey = String(this.config.get('anthropicApiKey', ''));
         this.settings = null;
         this.checkApiKey();
+        this.dashboard = null;
     }
 
     private checkApiKey(): void {
@@ -106,13 +111,62 @@ export class Dashboard {
         }
     }
 
+    private async generateRoutine(routineFocus:BodyPart): Promise<string> {
+        try {
+            console.log('Starting routine generation');
+            console.log(`Movement focus: ${routineFocus}`);
+            console.log('API Key exists:', Boolean(this.apiKey));
+
+            if (!this.apiKey) {
+                console.log('No API key found');
+                this.checkApiKey();
+                throw new Error('Anthropic API key not configured');
+            }
+
+            const commonPrompt = `You are speaking to ${this.userName}, a coder who is taking a movement break of ${this.breakDuration} minutes.
+            In a numbered list, suggest stretches and movements suitable for this amount of time.
+            Give a time for each exercise, so that all times added together are equivalent to ${this.breakDuration} minutes. `;
+
+            const bodyPrompts: Record<BodyPart, string> = {
+                'Neck': commonPrompt + "Focus suggestions on the neck.",
+                'Upper back': commonPrompt + "Focus suggestions on the upper back.",
+                'Lower back': commonPrompt + "Focus suggestions on the lower back.",
+                'Wrists': commonPrompt + "Focus suggestions on the wrists.",
+                'Mix' : commonPrompt + "Suggestions can be a mix of neck, back and wrist exercises."
+            };
+
+            const prompt = bodyPrompts[routineFocus];
+
+            const response = await axios.post('https://api.anthropic.com/v1/messages', {
+                model: 'claude-3-haiku-20240307',
+                max_tokens: 300,
+                messages: [{
+                    role: 'user',
+                    content: `${prompt} Keep it to 10 sentences maximum.`
+                }]
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': this.apiKey,
+                    'anthropic-version': '2023-06-01'
+                }
+            });
+
+            console.log('API Response received');
+            return response.data.content[0].text;
+        } catch (error) {
+            console.error('Error in generateRoutine:', error);
+            return "Error";
+        }
+    }
+
     popUp = async () => {
         try {
             console.log('Starting popup creation');
             const encouragementMessage = await this.generateEncouragement();
             console.log('Encouragement received:', encouragementMessage);
 
-            const dashboard = vscode.window.createWebviewPanel(
+            this.dashboard = vscode.window.createWebviewPanel(
                 'paceDashboard',
                 'devPace Dashboard',
                 vscode.ViewColumn.One,
@@ -122,42 +176,60 @@ export class Dashboard {
                 }
             );
 
-            const imageUri = dashboard.webview.asWebviewUri(
+            const imageUri = this.dashboard.webview.asWebviewUri(
                 vscode.Uri.file(path.join(this.context.extensionPath, 'images', 'dalle-landscape1.jpeg'))
             );
 
-            dashboard.webview.html = `<html>
+            const formDisposable2 = this.dashboard.webview.onDidReceiveMessage(async (message) => {
+                const routineMessage = await this.generateRoutine(message.text);
+                console.log('Routine received:', routineMessage);
+                if (this.dashboard) {
+                    const data = { message: routineMessage };
+                    this.dashboard.webview.postMessage(data);
+                }
+                if (this.settings) {
+                    this.settings.dispose();
+                    this.context.subscriptions.push(formDisposable2);
+                }
+            });
+
+            this.dashboard.webview.html = `<html>
                 <body style="color: white; background-color: #1e1e1e;">
                     <h1 style="font-size: 24px; margin-bottom: 20px;">${encouragementMessage}</h1>
-                    <p>Your break is set for ${this.breakDuration} minutes.</p>
-                    <span id="timerText"></span>
-                    <p>How is your body feeling? I can recommend a movement routine.</p>
-                    <p>Let me know which areas (if any) you would like the routine to focus on!</p>
+                    <p>How is your body feeling? I can recommend a movement routine. Let me know which area you would like to focus on or if you prefer a mix!</p>
+                    <p>Be sure to click submit to get a suggestion.</p>
                     <form action="/submit" method="post" style="margin: 10px 0; padding: 5px;">
                         <label>
-                            <input type="checkbox" name="bodyParts" value="Neck">
+                            <input type="radio" name="bodyParts" value="Neck">
                             Neck
                         </label>
                         <br>
                         <label>
-                            <input type="checkbox" name="bodyParts" value="Upper back">
+                            <input type="radio" name="bodyParts" value="Upper back">
                             Upper back
                         </label>
                         <br>
                         <label>
-                            <input type="checkbox" name="bodyParts" value="Lower back">
+                            <input type="radio" name="bodyParts" value="Lower back">
                             Lower back
                         </label>
                         <br>
                         <label>
-                            <input type="checkbox" name="bodyParts" value="Wrists">
+                            <input type="radio" name="bodyParts" value="Wrists">
                             Wrists
                         </label>
                         <br>
+                        <label>
+                            <input type="radio" name="bodyParts" value="Mix">
+                            Mix
+                        </label>
                         <br>
-                        <button type="submit">Submit</button>
+                        <br>
+                        <button id = "submitButton" type="submit">Submit</button>
                     </form>                    
-                    <br></br>
+                    <p>Your break is set for ${this.breakDuration} minutes.</p>
+                    <span id="timerText"></span>
+                    <p id="routine"></p>
                     <img src="${imageUri}" alt="Natural landscape" style="max-width: 100%; height: auto;">
                     <script>
                     window.onload = function(){
@@ -176,14 +248,29 @@ export class Dashboard {
                             }
                         }, 1000);
                     }
+                    document.getElementById('submitButton').addEventListener('click', () => {
+                        event.preventDefault(); 
+                        document.getElementById('submitButton').style.display = 'none';
+                        const selected = document.querySelector('input[name="bodyParts"]:checked').value;
+                        window.acquireVsCodeApi().postMessage({
+                            command: 'submit', 
+                            text: selected
+                        });
+                    })
+                    window.addEventListener('message', event => {
+                        const message = event.data;
+                        console.log(message);
+                        document.getElementById('routine').innerText = message.message;
+                    });
                     </script>
                 </body>
             </html>`;
 
             setTimeout(() => {
                 //nested code gets executed only after this.breakDuration * 60 * 1000 has expired
-                dashboard.dispose();
-                this.timeoutId = setTimeout(() => {
+                if (this.dashboard){
+                    this.dashboard.dispose();
+                }this.timeoutId = setTimeout(() => {
                     vscode.commands.executeCommand('my-first-extension.popUp')
                 }, this.workTime * 60 * 1000);
             }, this.breakDuration * 60 * 1000);
