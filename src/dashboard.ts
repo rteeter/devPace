@@ -131,8 +131,32 @@ export class Dashboard {
                     <h1 style="font-size: 24px; margin-bottom: 20px;">${encouragementMessage}</h1>
                     <p>Your break is set for ${this.breakDuration} minutes.</p>
                     <span id="timerText"></span>
-                    <p>How is your body feeling? Let me know which parts may feel tense.</p>
-                    <input type="text" id="userInput" placeholder="Type here!" style="margin: 10px 0; padding: 5px;"/>
+                    <p>How is your body feeling? I can recommend a movement routine.</p>
+                    <p>Let me know which areas (if any) you would like the routine to focus on!</p>
+                    <form action="/submit" method="post" style="margin: 10px 0; padding: 5px;">
+                        <label>
+                            <input type="checkbox" name="bodyParts" value="Neck">
+                            Neck
+                        </label>
+                        <br>
+                        <label>
+                            <input type="checkbox" name="bodyParts" value="Upper back">
+                            Upper back
+                        </label>
+                        <br>
+                        <label>
+                            <input type="checkbox" name="bodyParts" value="Lower back">
+                            Lower back
+                        </label>
+                        <br>
+                        <label>
+                            <input type="checkbox" name="bodyParts" value="Wrists">
+                            Wrists
+                        </label>
+                        <br>
+                        <br>
+                        <button type="submit">Submit</button>
+                    </form>                    
                     <br></br>
                     <img src="${imageUri}" alt="Natural landscape" style="max-width: 100%; height: auto;">
                     <script>
