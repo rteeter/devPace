@@ -355,7 +355,8 @@ export class Dashboard {
                     document.getElementById('submitButton').addEventListener('click', () => {
                         event.preventDefault(); 
                         document.getElementById('submitButton').style.display = 'none';
-                        const selected = document.querySelector('input[name="bodyParts"]:checked').value;
+                        var selected = document.querySelector('input[name="bodyParts"]:checked');
+                        selected = selected ? selected.value : "Mix";
                         window.acquireVsCodeApi().postMessage({
                             command: 'submit', 
                             text: selected
