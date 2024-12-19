@@ -496,6 +496,10 @@ export class Dashboard {
                         event.preventDefault();
                         feedback.textContent = 'Please enter a valid integer for duration of breaks.';
                         feedback.style.color = 'red';
+                    } else if (nameInput.trim() === "") {
+                        event.preventDefault();
+                        feedback.textContent = 'Please enter a username.';
+                        feedback.style.color = 'red';
                     } else {
                         window.acquireVsCodeApi().postMessage({
                             command: 'submit', 
