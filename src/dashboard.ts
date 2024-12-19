@@ -10,6 +10,9 @@ interface Message {
 type EncouragementStyle = 'Cheerleader' | 'Supportive Friend' | 'Zen Master' |
     'Motivational Coach' | 'Inspiring Leader' | 'Friendly Colleague';
 
+type BodyPart = 'Neck' | 'Upper back' | 'Lower back' |
+    'Wrists' | "Mix";
+
 export class Dashboard {
     private context: vscode.ExtensionContext;
     private timeoutId: NodeJS.Timeout | undefined;
@@ -20,6 +23,7 @@ export class Dashboard {
     private settings: vscode.WebviewPanel | null = null;
     private encouragementStyle: EncouragementStyle;
     private apiKey: string;
+    private dashboard: vscode.WebviewPanel | null = null;
 
     constructor(extensionContext: vscode.ExtensionContext) {
         this.context = extensionContext;
@@ -32,6 +36,7 @@ export class Dashboard {
         this.apiKey = String(this.config.get('anthropicApiKey', ''));
         this.settings = null;
         this.checkApiKey();
+        this.dashboard = null;
     }
 
     private checkApiKey(): void {
@@ -106,13 +111,111 @@ export class Dashboard {
         }
     }
 
+    private async generateRoutine(routineFocus: BodyPart): Promise<string> {
+        try {
+            console.log('Starting routine generation');
+            console.log(`Movement focus: ${routineFocus}`);
+            console.log('API Key exists:', Boolean(this.apiKey));
+
+            if (!this.apiKey) {
+                console.log('No API key found');
+                this.checkApiKey();
+                throw new Error('Anthropic API key not configured');
+            }
+
+            const commonPrompt = `You are speaking to ${this.userName}, a coder who is taking a movement break of ${this.breakDuration} minutes.
+            In a numbered list of at most 5 items, suggest stretches and movements suitable for this amount of time.
+            Give a time for each exercise, so that all times added together are equivalent to ${this.breakDuration} minutes. `;
+
+            const bodyPrompts: Record<BodyPart, string> = {
+                'Neck': commonPrompt + "Focus suggestions on the neck.",
+                'Upper back': commonPrompt + "Focus suggestions on the upper back.",
+                'Lower back': commonPrompt + "Focus suggestions on the lower back.",
+                'Wrists': commonPrompt + "Focus suggestions on the wrists.",
+                'Mix': commonPrompt + "Suggestions can be a mix of neck, back and wrist exercises."
+            };
+
+            const prompt = bodyPrompts[routineFocus];
+
+            const response = await axios.post('https://api.anthropic.com/v1/messages', {
+                model: 'claude-3-haiku-20240307',
+                max_tokens: 300,
+                messages: [{
+                    role: 'user',
+                    content: `${prompt} Keep it to 10 sentences maximum.`
+                }]
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': this.apiKey,
+                    'anthropic-version': '2023-06-01'
+                }
+            });
+
+            console.log('API Response received');
+            return response.data.content[0].text;
+        } catch (error) {
+            console.error('Error in generateRoutine:', error);
+            const commonIntro = `Here is a routine you can try, ${this.userName}.\n`
+            const fallbackMessages: Record<BodyPart, string> = {
+                'Neck': commonIntro + '\n' + `1. Neck Rolls: Sit or stand straight. Drop your chin to your chest and slowly roll your head in a full circle. Roll clockwise and then counterclockwise, repeating 3-5 times in each direction. Keep your shoulders relaxed and avoid hyperextending your neck backward.
+                
+                2. Side-to-Side Stretch: Tilt your head toward your right shoulder, bringing your ear closer to your shoulder (don’t raise your shoulder). Hold for 10-15 seconds, then switch to the left side. For a deeper stretch, gently place your hand on the side of your head.
+                
+                3. Forward and Backward Stretch: Tuck your chin toward your chest and hold for 5-10 seconds. Then tilt your head back, looking upward, and hold for 5-10 seconds. Repeat three times.
+                
+                4. Look Over Your Shoulder Stretch: Turn your head to look over your right shoulder and hold for 10-15 seconds. Return to center, then repeat on the left side. Do this 2-3 times per side.
+                
+                5. Shoulder and Neck Combo: Shrug your shoulders up toward your ears, hold for 2 seconds, and relax. Roll your shoulders backward in a circular motion five times, then forward five times. Let your arms hang naturally to finish.`,
+                'Upper back': commonIntro + '\n' + `1. Seated Spinal Twist: Sit tall in your chair with feet flat on the ground. Place your right hand on the backrest or your left thigh and twist your upper body to the right, keeping your hips facing forward. Hold for 10-15 seconds, then switch sides. Repeat 2-3 times per side.
+                
+                2. Cat-Cow Stretch: Sit on the edge of your chair or stand with feet hip-width apart. Inhale as you arch your back, lifting your chest and looking slightly upward (cow pose). Exhale as you round your back, tucking your chin toward your chest and pulling your shoulder blades apart (cat pose). Repeat 5-7 times.
+                
+                3. Shoulder Blade Squeeze: Sit or stand upright. Pull your shoulder blades back and down, as if squeezing a pencil between them. Hold for 5 seconds, then release. Repeat 8-10 times.
+                
+                4. Forward Fold: Stand with feet shoulder-width apart. Hinge at the hips, allowing your arms to dangle toward the floor and your upper body to relax. Hold for 15-20 seconds, letting gravity release tension in your back. Slowly roll back up to standing.
+                
+                5. Wall Angels: Stand with your back flat against a wall, feet a few inches away from it. Press your lower back into the wall and raise your arms into a "goalpost" position. Slowly move your arms up and down, as if making a snow angel, keeping them in contact with the wall. Perform 8-10 repetitions.`,
+                'Lower back': commonIntro + '\n' + `1. Seated Forward Fold: Sit at the edge of your chair with your feet flat on the floor. Hinge at your hips and slowly fold forward, letting your chest rest on your thighs and your hands dangle toward the floor. Hold for 15-20 seconds, then slowly return to an upright position. Repeat 2-3 times.
+                
+                2. Seated Spinal Twist: Sit tall in your chair with feet flat on the ground. Place your right hand on the backrest or your left thigh and twist your upper body to the right, keeping your lower back supported. Hold for 10-15 seconds, then switch sides. Repeat 2-3 times per side.
+                
+                3. Pelvic Tilts: Sit upright with your feet flat on the floor and hands resting on your thighs. Gently tilt your pelvis forward, arching your lower back, then tilt it backward, flattening your lower back against the chair. Repeat 10-12 times.
+                
+                4. Knee-to-Chest Stretch: Sit upright and lift your right knee toward your chest. Hold it with both hands, pulling it gently closer, and hold for 10-15 seconds. Lower your leg and repeat with the left knee. Perform 2-3 times per side.
+                
+                5. Standing Side Stretch: Stand with your feet shoulder-width apart. Raise your right arm overhead and gently lean to the left, keeping your hips stable. Hold for 10-15 seconds, return to center, then repeat on the other side. Perform 2-3 stretches per side.`,
+                'Wrists': commonIntro + '\n' + `1. Wrist Circles: Extend your arms in front of you with your fists closed. Slowly rotate your wrists clockwise for 10-15 seconds, then counterclockwise for another 10-15 seconds. Repeat 2-3 times.
+                
+                2. Prayer Stretch: Bring your palms together in front of your chest with your elbows at the same height. Slowly lower your hands while keeping your palms pressed together until you feel a stretch in your wrists and forearms. Hold for 10-15 seconds and repeat 2-3 times.
+                
+                3. Reverse Prayer Stretch: Press the backs of your hands together at chest height with your fingers pointing downward. Gently push until you feel a stretch in the tops of your wrists. Hold for 10-15 seconds and repeat 2-3 times.
+                
+                4. Wrist Flexor Stretch: Extend your right arm forward with your palm facing up. Use your left hand to gently pull your fingers down and back toward your body. Hold for 10-15 seconds, then switch to the other side. Repeat 2-3 times per side.
+                
+                5. Wrist Extensor Stretch: Extend your right arm forward with your palm facing down. Use your left hand to gently pull your fingers back toward your body. Hold for 10-15 seconds, then switch to the other side. Repeat 2-3 times per side.`,
+                'Mix': commonIntro + '\n' + `1. Neck Rolls: Sit or stand straight. Drop your chin to your chest and slowly roll your head in a full circle. Roll clockwise and then counterclockwise, repeating 3-5 times in each direction. Keep your shoulders relaxed.
+                
+                2. Wrist Circles: Extend your arms in front of you with your fists closed. Slowly rotate your wrists clockwise for 10-15 seconds, then counterclockwise for another 10-15 seconds. Repeat 2-3 times.
+                
+                3. Seated Spinal Twist: Sit tall in your chair with feet flat on the ground. Place your right hand on the backrest or your left thigh and twist your upper body to the right. Hold for 10-15 seconds, then switch sides. Repeat 2-3 times per side.
+                
+                4. Prayer Stretch: Bring your palms together in front of your chest with your elbows at the same height. Slowly lower your hands while keeping your palms pressed together until you feel a stretch in your wrists and forearms. Hold for 10-15 seconds and repeat 2-3 times.
+                
+                5. Cat-Cow Stretch: Sit on the edge of your chair or stand with feet hip-width apart. Inhale as you arch your back, lifting your chest and looking slightly upward (cow pose). Exhale as you round your back, tucking your chin toward your chest and pulling your shoulder blades apart (cat pose). Repeat 5-7 times.`
+            };
+
+            return fallbackMessages[routineFocus] || fallbackMessages['Mix'];;
+        }
+    }
+
     popUp = async () => {
         try {
             console.log('Starting popup creation');
             const encouragementMessage = await this.generateEncouragement();
             console.log('Encouragement received:', encouragementMessage);
 
-            const dashboard = vscode.window.createWebviewPanel(
+            this.dashboard = vscode.window.createWebviewPanel(
                 'paceDashboard',
                 'devPace Dashboard',
                 vscode.ViewColumn.One,
@@ -122,19 +225,116 @@ export class Dashboard {
                 }
             );
 
-            const imageUri = dashboard.webview.asWebviewUri(
-                vscode.Uri.file(path.join(this.context.extensionPath, 'images', 'dalle-landscape1.jpeg'))
+            const imageUri = this.dashboard.webview.asWebviewUri(
+                vscode.Uri.file(path.join(this.context.extensionPath, 'images', 'dalle-computer.png'))
             );
 
-            dashboard.webview.html = `<html>
-                <body style="color: white; background-color: #1e1e1e;">
-                    <h1 style="font-size: 24px; margin-bottom: 20px;">${encouragementMessage}</h1>
-                    <p>Your break is set for ${this.breakDuration} minutes.</p>
-                    <span id="timerText"></span>
-                    <p>How is your body feeling? Let me know which parts may feel tense.</p>
-                    <input type="text" id="userInput" placeholder="Type here!" style="margin: 10px 0; padding: 5px;"/>
-                    <br></br>
-                    <img src="${imageUri}" alt="Natural landscape" style="max-width: 100%; height: auto;">
+            const formDisposable2 = this.dashboard.webview.onDidReceiveMessage(async (message) => {
+                const routineMessage = await this.generateRoutine(message.text);
+                console.log('Routine received:', routineMessage);
+                if (this.dashboard) {
+                    const data = { message: routineMessage };
+                    this.dashboard.webview.postMessage(data);
+                }
+                if (this.settings) {
+                    this.settings.dispose();
+                    this.context.subscriptions.push(formDisposable2);
+                }
+            });
+
+            this.dashboard.webview.html = `<html>
+                <body style="
+                    color: white; 
+                    margin: 0;
+                    padding: 20px;
+                    min-height: 100vh;
+                    position: relative;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                    ">
+                    <div style="
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-image: url('${imageUri}');
+                        background-size: cover;
+                        background-position: center;
+                        opacity: 0.6;
+                        z-index: 0;
+                        ">
+                    </div>
+                    <div style="
+                        position: relative;
+                        z-index: 1;
+                        padding: 20px;
+                        background-color: rgba(0, 0, 0, 0.7);
+                        border-radius: 8px;
+                        backdrop-filter: blur(3px);
+                        ">
+                        <h1 style="font-size: 24px; margin-bottom: 20px;">${encouragementMessage}</h1>
+                        <p>How is your body feeling? I can recommend a movement routine. Let me know which area you would like to focus on or if you prefer a mix!</p>
+                        <p>Be sure to click submit to get a suggestion.</p>
+                        <style>
+                            .radio-group {
+                                display: flex;
+                                gap: 10px;
+                            }
+                            label {
+                                display: inline;
+                            }
+                            input[type="radio"] {
+                                margin-right: 5px;
+                            }
+                            button {
+                                display: block;
+                                margin-top: 20px;
+                                padding: 8px 16px;
+                                background-color: #007acc;
+                                color: white;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                            }
+                            button:hover {
+                                background-color: #005999;
+                            }
+                        </style>
+                        <form action="/submit" method="post" style="margin: 10px 0;">
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="bodyParts" value="Neck">
+                                    Neck
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="bodyParts" value="Upper back">
+                                    Upper back
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="bodyParts" value="Lower back">
+                                    Lower back
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="bodyParts" value="Wrists">
+                                    Wrists
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="bodyParts" value="Mix">
+                                    Mix
+                                </label>
+                                <br>
+                            </div>
+                            <br>
+                            <button id="submitButton" type="submit">Submit</button>
+                        </form>                    
+                        <p>Your break is set for ${this.breakDuration} minutes.</p>
+                        <span id="timerText" style="font-size: 20px; font-weight: bold;"></span>
+                        <p id="routine"></p>
+                    </div>
                     <script>
                     window.onload = function(){
                         const timerText = document.getElementById('timerText');
@@ -152,14 +352,29 @@ export class Dashboard {
                             }
                         }, 1000);
                     }
+                    document.getElementById('submitButton').addEventListener('click', () => {
+                        event.preventDefault(); 
+                        document.getElementById('submitButton').style.display = 'none';
+                        const selected = document.querySelector('input[name="bodyParts"]:checked').value;
+                        window.acquireVsCodeApi().postMessage({
+                            command: 'submit', 
+                            text: selected
+                        });
+                    })
+                    window.addEventListener('message', event => {
+                        const message = event.data;
+                        console.log(message);
+                        document.getElementById('routine').innerText = message.message;
+                    });
                     </script>
                 </body>
             </html>`;
 
             setTimeout(() => {
                 //nested code gets executed only after this.breakDuration * 60 * 1000 has expired
-                dashboard.dispose();
-                this.timeoutId = setTimeout(() => {
+                if (this.dashboard) {
+                    this.dashboard.dispose();
+                } this.timeoutId = setTimeout(() => {
                     vscode.commands.executeCommand('my-first-extension.popUp')
                 }, this.workTime * 60 * 1000);
             }, this.breakDuration * 60 * 1000);
