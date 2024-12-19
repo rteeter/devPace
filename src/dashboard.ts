@@ -221,12 +221,17 @@ export class Dashboard {
                 vscode.ViewColumn.One,
                 {
                     enableScripts: true,
-                    localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, 'images'))]
+                    localResourceRoots: [vscode.Uri.file(path.join(this.context.extensionPath, 'images')),
+                        vscode.Uri.file(path.join(this.context.extensionPath, 'audio')) ]
                 }
             );
 
             const imageUri = this.dashboard.webview.asWebviewUri(
                 vscode.Uri.file(path.join(this.context.extensionPath, 'images', 'dalle-computer.png'))
+            );
+
+            const audioFile = this.dashboard.webview.asWebviewUri(
+                vscode.Uri.file(path.join(this.context.extensionPath, 'audio', 'med-audio.mp3'))
             );
 
             const formDisposable2 = this.dashboard.webview.onDidReceiveMessage(async (message) => {
@@ -333,7 +338,11 @@ export class Dashboard {
                         </form>                    
                         <p>Your break is set for ${this.breakDuration} minutes.</p>
                         <span id="timerText" style="font-size: 20px; font-weight: bold;"></span>
-                        <p id="routine"></p>
+                        <p id="routine"></p<br>
+                        <p> Music for Meditation</p>
+                        <audio id='myMusic' controls preload='auto' loop>
+                        <source src="${audioFile}" type="audio/mpeg">
+                        </audio> 
                     </div>
                     <script>
                     window.onload = function(){
@@ -383,14 +392,14 @@ export class Dashboard {
             console.error('Error in popUp:', error);
             vscode.window.showErrorMessage('Error showing dashboard');
         }
-    }
+    };
 
     //this does not cancel the first popup (I think); only subsequent popups
     pausePopUps = () => {
         if (this.timeoutId !== null) {
             clearTimeout(this.timeoutId);
         }
-    }
+    };
 
     startPopUps = () => {
         if (!this.apiKey) {
@@ -399,7 +408,7 @@ export class Dashboard {
         setTimeout(() => {
             vscode.commands.executeCommand('my-first-extension.popUp')
         }, this.workTime * 60 * 1000);
-    }
+    };
 
     waitForMssg = (): Promise<Message> => {
         return new Promise((resolve, reject) => {
@@ -413,8 +422,8 @@ export class Dashboard {
                 const formDisposable = this.settings.webview.onDidReceiveMessage(listener);
                 this.context.subscriptions.push(formDisposable);
             }
-        })
-    }
+        });
+    };
 
     waitForUpdates = async () => {
         await this.config.update('userName', this.userName, vscode.ConfigurationTarget.Global);
@@ -423,7 +432,7 @@ export class Dashboard {
         await this.config.update('encouragementStyle', this.encouragementStyle, vscode.ConfigurationTarget.Global);
         await this.config.update('configured', true, vscode.ConfigurationTarget.Global);
         this.checkApiKey();
-    }
+    };
 
     updateSettings = () => {
         this.checkApiKey();
@@ -491,5 +500,6 @@ export class Dashboard {
                 }) 
             </script>
         </body></html>`;
-    }
+    };
+
 }
