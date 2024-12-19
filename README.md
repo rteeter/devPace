@@ -1,28 +1,23 @@
-# DevPace - Your Mindful Coding Companion
+# DevPace
 
-DevPace is a VS Code extension that helps developers maintain a healthy work pace by providing scheduled breaks with personalized AI-generated encouragement messages and targeted movement routines.
+## Overview
 
-## Features
+**Project Summary**
+DevPace is a VS Code extension that helps developers maintain a healthy work pace by providing scheduled breaks with personalized AI-generated encouragement messages and targeted movement routines. Using Claude AI, it generates custom encouragement in different styles and provides tailored exercise suggestions while playing calming meditation music to help developers take mindful breaks and maintain physical wellness while coding.
 
-- Customizable work and break durations
-- AI-powered encouragement messages in different styles:
-  - Motivational Coach
-  - Friendly Colleague
-  - Zen Master
-  - Cheerleader
-  - Inspiring Leader
-  - Supportive Friend
-- AI-generated movement routines tailored to:
-  - Neck tension
-  - Upper back
-  - Lower back
-  - Wrists
-  - Mixed routines
-- Interactive break timer
-- Beautiful ambient background
-- Body awareness prompts
+**Authors**
+- Adriana Mendoza Leigh - [Email](avml@seas.upenn.edu) - [GitHub](https://github.com/adrianavml)
+- Rachel Teeter - [Email](reteeter@seas.upenn.edu) - [GitHub](https://github.com/rteeter)
+- Rebecca Keith - [Email](lrk145@seas.upenn.edu) - [GitHub](https://github.com/lark523)
 
-## Installation and Setup
+## Usage
+
+### Prerequisites
+- Node.js and npm installed
+- Visual Studio Code
+- Anthropic API key
+
+### Installation
 
 1. Clone the repository:
 ```bash
@@ -40,88 +35,111 @@ npm install
 npm run compile
 ```
 
-4. Run the extension in development mode:
+4. Get your Anthropic API Key:
+- Visit [Anthropic Console](https://console.anthropic.com/)
+- Sign up or log in
+- Go to 'API Keys' section
+- Click 'Create Key'
+- Copy your new API key
+
+5. Add the API key to VS Code:
+- Open VS Code
+- Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac) 
+- Type "Preferences: Open User Settings (JSON)"
+- Add this to your settings.json:
+```json
+{
+    "devPace.anthropicApiKey": "your-api-key-here"
+}
+```
+
+### Deployment
+
+1. Run the extension:
 - Press F5 in VS Code to start debugging
 - A new VS Code window will open with the extension loaded
-- The extension will prompt you to set your preferences on first launch
+- The extension will prompt you to set your preferences
 
-## Configuration Requirements
+2. Configure your preferences:
+- Enter your name for personalized messages
+- Set work duration (minutes between breaks)
+- Set break duration 
+- Choose your preferred encouragement style:
+  - Motivational Coach
+  - Friendly Colleague
+  - Zen Master
+  - Cheerleader
+  - Inspiring Leader
+  - Supportive Friend
+- Click Save
 
-1. Get your Anthropic API Key:
-   - Visit [Anthropic Console](https://console.anthropic.com/)
-   - Sign up or log in
-   - Go to 'API Keys' section
-   - Click 'Create Key'
-   - Copy your new API key
-2. Add the API key to VS Code:
-   - Open VS Code
-   - Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
-   - Type "Preferences: Open User Settings (JSON)"
-   - Add this to your settings.json:
-   ```json
-   {
-       "devPace.anthropicApiKey": "your-api-key-here"
-   }
-   ```
+3. During breaks:
+- Read your personalized encouragement message
+- Listen to calming meditation music (can be controlled with audio player)
+- Select an area for your movement routine:
+  - Neck
+  - Upper back
+  - Lower back
+  - Wrists
+  - Mix of exercises
+- Follow the AI-generated exercise suggestions
+- Use the built-in timer to track your break
+- Return to work when the break completes
 
-## Extension Settings
-
-This extension contributes the following settings:
-
-* `devPace.userName`: Your name for personalized messages
-* `devPace.workTime`: Duration of work sessions in minutes
-* `devPace.breakDuration`: Duration of breaks in minutes
-* `devPace.encouragementStyle`: Style of AI-generated encouragement messages
-* `devPace.anthropicApiKey`: Anthropic API key for generating messages
-
-## Commands
-
-- `devPace.updateSettings`: Open settings panel to update preferences
+4. Available Commands:
+- `devPace.updateSettings`: Open settings panel
 - `devPace.pausePopUps`: Pause break notifications
 - `devPace.startPopUps`: Resume break notifications
 - `devPace.popUp`: Manually trigger a break
 
-## Known Issues
-
-- Break timer continues even if VS Code is inactive
-
-## Release Notes
-
-### 1.0.0
-
-- Initial release
-- AI-powered encouragement messages using Claude
+### Features
+- AI-generated encouragement messages
 - Customizable work/break durations
-- Multiple encouragement styles
 - Targeted movement routines
+- Built-in meditation music player
 - Interactive break timer
-- Dynamic background
+- Dynamic ambient backgrounds
 
-## Development
+## Additional Information
 
-1. Make changes to the code
-2. Compile:
-```bash
-npm run compile
+### Tools Used
+- [VS Code Extension API](https://code.visualstudio.com/api) - Extension development framework
+- [Claude API](https://docs.anthropic.com/claude/reference/getting-started-with-the-api) - AI text generation
+- [TypeScript](https://www.typescriptlang.org/) - Programming language
+- [Node.js](https://nodejs.org/) - Runtime environment
+- [Axios](https://axios-http.com/) - HTTP client
+- Meditation Music - Royalty-free audio for break periods
+
+### Project Structure
 ```
-3. Press F5 to run the extension in debug mode
+devpace/
+├── src/
+│   ├── extension.ts
+│   └── dashboard.ts
+├── images/
+│   └── dalle-computer.png
+├── audio/
+│   └── med-audio.mp3
+├── package.json
+└── README.md
+```
 
-## Contributing
+### Known Issues
+- Break timer continues even if VS Code is inactive
+- Audio may not autoplay due to browser restrictions
 
+### Contributing
 1. Fork the repository
 2. Create your feature branch
 3. Commit your changes
 4. Push to the branch
 5. Create a Pull Request
 
-## License
+### Acknowledgments
+- VS Code Extension documentation and samples
+- Anthropic's Claude API documentation
+- Various ergonomics and developer wellness resources for exercise suggestions
+- Royalty-free meditation music providers
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
-
----
-
-For more information about VS Code extension development, see:
-* [VS Code Extension API](https://code.visualstudio.com/api)
-* [Your First Extension](https://code.visualstudio.com/api/get-started/your-first-extension)
-
-**Enjoy coding mindfully with DevPace!**
+### License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
