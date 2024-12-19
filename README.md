@@ -1,6 +1,6 @@
 # DevPace - Your Mindful Coding Companion
 
-DevPace is a VS Code extension that helps developers maintain a healthy work pace by providing scheduled breaks with personalized AI-generated encouragement messages.
+DevPace is a VS Code extension that helps developers maintain a healthy work pace by providing scheduled breaks with personalized AI-generated encouragement messages and targeted movement routines.
 
 ## Features
 
@@ -12,7 +12,14 @@ DevPace is a VS Code extension that helps developers maintain a healthy work pac
   - Cheerleader
   - Inspiring Leader
   - Supportive Friend
-- Beautiful landscape images during breaks
+- AI-generated movement routines tailored to:
+  - Neck tension
+  - Upper back
+  - Lower back
+  - Wrists
+  - Mixed routines
+- Interactive break timer
+- Beautiful ambient background
 - Body awareness prompts
 
 ## Installation and Setup
@@ -86,6 +93,9 @@ This extension contributes the following settings:
 - AI-powered encouragement messages using Claude
 - Customizable work/break durations
 - Multiple encouragement styles
+- Targeted movement routines
+- Interactive break timer
+- Dynamic background
 
 ## Development
 
