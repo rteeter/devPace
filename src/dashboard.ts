@@ -460,10 +460,10 @@ export class Dashboard {
                 <input type="text" id="userName" />
                 <br></br>
                 <label for="workTime">How long do you want to work for without a break (in minutes)?</label>
-                <input type="text" id="workTime" />
+                <input type="number" step="1" id="workTime" />
                 <br></br>
                 <label for="breakDuration">How long do you want your breaks to be (in minutes)?</label>
-                <input type="text" id="breakDuration" />
+                <input type="number" step="1" id="breakDuration" />
                 <br></br>
                 <label for="encouragementStyle">What kind of encouragement would you like?</label>
                 <select id="encouragementStyle">
@@ -477,6 +477,7 @@ export class Dashboard {
                 <br></br>
                 <button id="submitButton" type="button">Submit</button>
             </form>
+            <p id="feedback"></p>
             <p>You can always adjust these settings later by calling the command updateSettings.</p>
             <script> 
                 document.getElementById('submitButton').addEventListener('click', () => {
@@ -484,10 +485,22 @@ export class Dashboard {
                     const workInput = document.getElementById('workTime').value;
                     const breakInput = document.getElementById('breakDuration').value;
                     const styleInput = document.getElementById('encouragementStyle').value;
-                    window.acquireVsCodeApi().postMessage({
-                        command: 'submit', 
-                        text: [nameInput, workInput, breakInput, styleInput]
-                    });
+                    const feedback = document.getElementById('feedback');
+                    feedback.textContent = '';
+                    if (!Number.isInteger(Number(workInput)) || workInput.trim() === "" || Number(workInput) < 1){
+                        event.preventDefault();
+                        feedback.textContent = 'Please enter a valid integer for duration of work sessions.';
+                        feedback.style.color = 'red';
+                    } else if (!Number.isInteger(Number(breakInput)) || breakInput.trim() === "" || Number(breakInput) < 1){
+                        event.preventDefault();
+                        feedback.textContent = 'Please enter a valid integer for duration of breaks.';
+                        feedback.style.color = 'red';
+                    } else {
+                        window.acquireVsCodeApi().postMessage({
+                            command: 'submit', 
+                            text: [nameInput, workInput, breakInput, styleInput]
+                        });
+                    }
                 }) 
             </script>
         </body></html>`;
