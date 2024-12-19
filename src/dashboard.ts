@@ -11,7 +11,7 @@ type EncouragementStyle = 'Cheerleader' | 'Supportive Friend' | 'Zen Master' |
     'Motivational Coach' | 'Inspiring Leader' | 'Friendly Colleague';
 
 type BodyPart = 'Neck' | 'Upper back' | 'Lower back' |
-    'Wrists' | "Mix";    
+    'Wrists' | "Mix";
 
 export class Dashboard {
     private context: vscode.ExtensionContext;
@@ -111,7 +111,7 @@ export class Dashboard {
         }
     }
 
-    private async generateRoutine(routineFocus:BodyPart): Promise<string> {
+    private async generateRoutine(routineFocus: BodyPart): Promise<string> {
         try {
             console.log('Starting routine generation');
             console.log(`Movement focus: ${routineFocus}`);
@@ -132,7 +132,7 @@ export class Dashboard {
                 'Upper back': commonPrompt + "Focus suggestions on the upper back.",
                 'Lower back': commonPrompt + "Focus suggestions on the lower back.",
                 'Wrists': commonPrompt + "Focus suggestions on the wrists.",
-                'Mix' : commonPrompt + "Suggestions can be a mix of neck, back and wrist exercises."
+                'Mix': commonPrompt + "Suggestions can be a mix of neck, back and wrist exercises."
             };
 
             const prompt = bodyPrompts[routineFocus];
@@ -226,7 +226,7 @@ export class Dashboard {
             );
 
             const imageUri = this.dashboard.webview.asWebviewUri(
-                vscode.Uri.file(path.join(this.context.extensionPath, 'images', 'dalle-landscape1.jpeg'))
+                vscode.Uri.file(path.join(this.context.extensionPath, 'images', 'dalle-computer.png'))
             );
 
             const formDisposable2 = this.dashboard.webview.onDidReceiveMessage(async (message) => {
@@ -243,61 +243,98 @@ export class Dashboard {
             });
 
             this.dashboard.webview.html = `<html>
-                <body style="color: white; background-color: #1e1e1e;">
-                    <h1 style="font-size: 24px; margin-bottom: 20px;">${encouragementMessage}</h1>
-                    <p>How is your body feeling? I can recommend a movement routine. Let me know which area you would like to focus on or if you prefer a mix!</p>
-                    <p>Be sure to click submit to get a suggestion.</p>
-                    <style>
-                        .radio-group {
-                            display: flex;
-                            gap: 10px;
-                        }
-                        label {
-                            display: inline;
-                        }
-                        input[type="radio"] {
-                            margin-right: 5px;
-                        }
-                        button {
-                            display: block;
-                            margin-top: 20px;
-                        }
-                    </style>
-                    <form action="/submit" method="post" style="margin: 10px 0; padding: 5px;">
-                        <div class="radio-group">
-                            <label>
-                                <input type="radio" name="bodyParts" value="Neck">
-                                Neck
-                            </label>
+                <body style="
+                    color: white; 
+                    margin: 0;
+                    padding: 20px;
+                    min-height: 100vh;
+                    position: relative;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                    ">
+                    <div style="
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background-image: url('${imageUri}');
+                        background-size: cover;
+                        background-position: center;
+                        opacity: 0.6;
+                        z-index: 0;
+                        ">
+                    </div>
+                    <div style="
+                        position: relative;
+                        z-index: 1;
+                        padding: 20px;
+                        background-color: rgba(0, 0, 0, 0.7);
+                        border-radius: 8px;
+                        backdrop-filter: blur(3px);
+                        ">
+                        <h1 style="font-size: 24px; margin-bottom: 20px;">${encouragementMessage}</h1>
+                        <p>How is your body feeling? I can recommend a movement routine. Let me know which area you would like to focus on or if you prefer a mix!</p>
+                        <p>Be sure to click submit to get a suggestion.</p>
+                        <style>
+                            .radio-group {
+                                display: flex;
+                                gap: 10px;
+                            }
+                            label {
+                                display: inline;
+                            }
+                            input[type="radio"] {
+                                margin-right: 5px;
+                            }
+                            button {
+                                display: block;
+                                margin-top: 20px;
+                                padding: 8px 16px;
+                                background-color: #007acc;
+                                color: white;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                            }
+                            button:hover {
+                                background-color: #005999;
+                            }
+                        </style>
+                        <form action="/submit" method="post" style="margin: 10px 0;">
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="bodyParts" value="Neck">
+                                    Neck
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="bodyParts" value="Upper back">
+                                    Upper back
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="bodyParts" value="Lower back">
+                                    Lower back
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="bodyParts" value="Wrists">
+                                    Wrists
+                                </label>
+                                <br>
+                                <label>
+                                    <input type="radio" name="bodyParts" value="Mix">
+                                    Mix
+                                </label>
+                                <br>
+                            </div>
                             <br>
-                            <label>
-                                <input type="radio" name="bodyParts" value="Upper back">
-                                Upper back
-                            </label>
-                            <br>
-                            <label>
-                                <input type="radio" name="bodyParts" value="Lower back">
-                                Lower back
-                            </label>
-                            <br>
-                            <label>
-                                <input type="radio" name="bodyParts" value="Wrists">
-                                Wrists
-                            </label>
-                            <br>
-                            <label>
-                                <input type="radio" name="bodyParts" value="Mix">
-                                Mix
-                            </label>
-                            <br>
-                        </div>
-                        <br>
-                        <button id = "submitButton" type="submit">Submit</button>
-                    </form>                    
-                    <p>Your break is set for ${this.breakDuration} minutes.</p>
-                    <span id="timerText"></span>
-                    <p id="routine"></p>
-                    <img src="${imageUri}" alt="Natural landscape" style="max-width: 100%; height: auto;">
+                            <button id="submitButton" type="submit">Submit</button>
+                        </form>                    
+                        <p>Your break is set for ${this.breakDuration} minutes.</p>
+                        <span id="timerText" style="font-size: 20px; font-weight: bold;"></span>
+                        <p id="routine"></p>
+                    </div>
                     <script>
                     window.onload = function(){
                         const timerText = document.getElementById('timerText');
@@ -335,9 +372,9 @@ export class Dashboard {
 
             setTimeout(() => {
                 //nested code gets executed only after this.breakDuration * 60 * 1000 has expired
-                if (this.dashboard){
+                if (this.dashboard) {
                     this.dashboard.dispose();
-                }this.timeoutId = setTimeout(() => {
+                } this.timeoutId = setTimeout(() => {
                     vscode.commands.executeCommand('my-first-extension.popUp')
                 }, this.workTime * 60 * 1000);
             }, this.breakDuration * 60 * 1000);
