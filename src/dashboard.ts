@@ -124,7 +124,7 @@ export class Dashboard {
             }
 
             const commonPrompt = `You are speaking to ${this.userName}, a coder who is taking a movement break of ${this.breakDuration} minutes.
-            In a numbered list, suggest stretches and movements suitable for this amount of time.
+            In a numbered list of at most 5 items, suggest stretches and movements suitable for this amount of time.
             Give a time for each exercise, so that all times added together are equivalent to ${this.breakDuration} minutes. `;
 
             const bodyPrompts: Record<BodyPart, string> = {
