@@ -454,7 +454,7 @@ export class Dashboard {
                 this.breakDuration = Number(message.text[2]);
                 this.encouragementStyle = message.text[3] as EncouragementStyle;
                 this.waitForUpdates();
-                vscode.window.showInformationMessage(`Pace preferences updated successfully. Have a good day, ${this.userName}!`);
+                vscode.window.showInformationMessage(`devPace preferences updated. Have a good day, ${this.userName}!`);
                 if (this.settings) {
                     this.settings.dispose();
                 }
