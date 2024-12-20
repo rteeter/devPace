@@ -113,17 +113,6 @@ npm run package
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
-## Dependencies 
-    "@types/mocha": "^10.0.10",
-    "@types/node": "20.x",
-    "@types/vscode": "^1.96.0",
-    "@typescript-eslint/eslint-plugin": "^8.17.0",
-    "@typescript-eslint/parser": "^8.17.0",
-    "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1",
-    "eslint": "^9.16.0",
-    "typescript": "^5.7.2"
-    "axios": "^1.7.9"
 ---
 
 For more information about VS Code extension development, see:
