@@ -14,8 +14,8 @@ DevPace is a VS Code extension that helps developers maintain a healthy work pac
 
 ### Prerequisites
 - Node.js and npm installed
-- Visual Studio Code
-- Anthropic API key
+- Visual Studio Code (version 1.96.0 or higher)
+- Anthropic API key with credit
 
 ### Installation
 
@@ -41,8 +41,13 @@ npm run compile
 - Go to 'API Keys' section
 - Click 'Create Key'
 - Copy your new API key
+- Go to 'Billing section'
+- Click 'Add funds'
+- Enter the amount of credits you want to purchase
 
-5. Add the API key to VS Code:
+5. Add the API key to VS Code when prompted by the extension upon launching.
+
+Update or delete the API key later if needed:
 - Open VS Code
 - Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac) 
 - Type "Preferences: Open User Settings (JSON)"
@@ -98,7 +103,7 @@ npm run compile
 - Targeted movement routines
 - Built-in meditation music player
 - Interactive break timer
-- Dynamic ambient backgrounds
+- Dynamic ambient background
 
 ## Additional Information
 
@@ -138,7 +143,7 @@ devpace/
 ### Acknowledgments
 - VS Code Extension documentation and samples
 - Anthropic's Claude API documentation
-- Various ergonomics and developer wellness resources for exercise suggestions
+- ChatGPT for hard-coded exercise suggestions (default suggestions when no Anthropic API key is provided)
 - Royalty-free meditation music providers
 
 ### License
